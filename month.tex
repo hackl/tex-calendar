@@ -1,0 +1,179 @@
+%=============================================================================
+% File:  month.tex -- Calender showing the month
+% Author(s): Juergen Hackl <hackl.j@gmx.at>
+% Creation:  27 Jul 2017
+% Time-stamp: <Don 2017-07-27 18:51 juergen>
+%
+% Copyright (c) 2017 Juergen Hackl <hackl.j@gmx.at>
+%
+% More information on LaTeX: http://www.latex-project.org/
+%=============================================================================
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[a4paper,landscape]{article}
+
+%\usepackage[cm]{fullpage}
+\usepackage[margin=0pt]{geometry}
+ % \geometry{
+ % a4paper,
+ % total={297mm,210mm},
+ % landscape,
+ % }
+
+
+
+\usepackage{tikz}
+\usetikzlibrary{calendar,shadows,patterns}
+
+% Names of Holidays are inserted by employing this macro
+\def\termin#1#2{
+  \node [anchor=north west, text width= 3.4cm] at
+    ($(cal-#1.north west)+(3em, 0em)$) {\tiny{#2}};
+}
+
+\usepackage{fontspec}
+\setmainfont[ItalicFont={Fira Sans Light Italic},%
+BoldFont={Fira Sans},%
+BoldItalicFont={Fira Sans Italic}]%
+{Fira Sans Light}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% DOCUMENT
+\begin{document}
+
+\tikzstyle{every shadow}=[opacity=.4,shadow xshift=2pt,shadow yshift=-2pt,fill=black!60]
+\tikzstyle{caption}=[drop shadow,rounded corners=5pt,inner sep=4pt,draw=black!50,fill=black!5]
+\tikzstyle{plot legend}=[
+   rounded corners=2.5pt,inner xsep=3pt,inner ysep=2pt,
+   draw=black!50,fill=white,
+   font=\footnotesize,cells={anchor=center},
+   nodes={inner sep=2pt,text depth=0.15em,rounded corners=0pt,right}]
+ 
+\begin{tikzpicture}[remember picture,overlay]% anchor = west]% xshift=-0cm]
+\draw (current page.north) -- (current page.south);
+\end{tikzpicture}
+
+\begin{tikzpicture}[remember picture,overlay,shift={(current page.north west)}]%[remember picture,overlay,xshift=-0cm]
+
+\newcommand{\YYMM}{2017-08}
+\newlength{\daywidth}
+\newlength{\dayheight}
+\newlength{\weekheight}
+\newlength{\pagespace}
+\setlength{\daywidth}{3.4cm}
+\setlength{\dayheight}{2.5cm}
+\setlength{\weekheight}{5mm}
+\setlength{\pagespace}{12mm}
+
+ 
+\newcount\monthsheetdate
+\newcount\monthsheetweekday
+ 
+\pgfcalendardatetojulian{\YYMM-01}{\monthsheetdate}
+\pgfcalendarjuliantoweekday{\the\monthsheetdate}{\monthsheetweekday}
+\advance\monthsheetdate by -\the\monthsheetweekday
+\pgfcalendarjuliantodate{\the\monthsheetdate}{\myyear}{\mymonth}{\myday}
+\edef\monthsheetbegin{\myyear-\mymonth-\myday}
+ 
+\pgfcalendardatetojulian{\YYMM-last}{\monthsheetdate}
+\pgfcalendarjuliantoweekday{\the\monthsheetdate}{\monthsheetweekday}
+\advance\monthsheetdate by -\the\monthsheetweekday
+\advance\monthsheetdate by 6
+\pgfcalendarjuliantodate{\the\monthsheetdate}{\myyear}{\mymonth}{\myday}
+\edef\monthsheetend{\myyear-\mymonth-\myday}
+ 
+\begin{scope}[shift={(40.5mm,-20mm)}]
+\calendar[
+name =cal,
+    dates=\monthsheetbegin{} to \monthsheetend{},
+    execute before day scope={%
+      month caption:
+      \ifdate{equals=\YYMM-01}{%
+        \path (3.5\daywidth,0)
+          node[above=1.8cm,
+               every month,
+               font=\Huge\bf,
+               caption,
+               inner sep=.5em]
+            {\tikzmonthtext{} \tikzyeartext}
+        ;
+      }{}
+      % week day captions:
+      \ifdate{at most=\monthsheetbegin+6}{
+        \path (\pgfcalendarcurrentweekday\daywidth,0)
+          node[xshift=.5\daywidth,
+               font=\large\bf,
+               above,
+               anchor=south,
+               draw,
+               minimum width=\daywidth,
+               minimum height=\weekheight,
+               inner sep = 0.0ex,
+               outer sep = 0pt,
+               text=white,
+               week bg
+               ] {%
+                 \MakeUppercase{\pgfcalendarweekdayname{\pgfcalendarcurrentweekday}}%
+          };
+      }{}
+    },
+    execute at begin day scope={%
+      \pgftransformxshift{\pgfcalendarcurrentweekday\daywidth}%
+    },
+    execute after day scope={%
+      \ifdate{Wednesday}{%
+        \pgftransformxshift{\pagespace}
+      }{}%
+    },
+    execute after day scope={%
+      \ifdate{Sunday}{%
+        \pgftransformyshift{-\dayheight}%
+        \pgftransformxshift{-\pagespace}
+      }{}%
+    },
+%    week list,
+%    day xshift=\daywidth,
+%    day yshift=\dayheight,
+    day bg/.style=,
+    every day text/.style={font=\large\bf},
+    week bg/.style={fill=black!50},
+    day code={%
+      \node[anchor=north west,
+            draw,
+            minimum width=\daywidth,
+            minimum height=\dayheight,
+            day bg]{};%
+      \node[anchor=north west,
+            every day text,
+            inner sep=7pt]{\tikzdaytext};%
+    },
+  every month/.append style={anchor=base}
+%    month label above centered
+  ]
+  if (Sunday) [red]
+  if (weekend) [day bg/.append style={fill=black!10}]
+  if (at most=\YYMM-01+-1,at least=\YYMM-last+1)
+    [%day bg/.append style={pattern=north east lines,pattern color=black!50},
+     day bg/.append style={fill=black!25},
+     every day text/.append style={font=\large}]
+;
+\end{scope}
+
+\draw (0,0) -- (1,-1);
+% \termin{2017-08-02}{Pfingstsonntag}
+\end{tikzpicture}
+
+
+\begin{tikzpicture}[remember picture,overlay]% anchor = west]% xshift=-0cm]
+\draw (current page.north east) --++ (-.6,-.6);
+\end{tikzpicture}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
