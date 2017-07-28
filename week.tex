@@ -1,0 +1,385 @@
+%=============================================================================
+% File:  week.tex -- Calender showing the week
+% Author(s): Juergen Hackl <hackl.j@gmx.at>
+% Creation:  27 Jul 2017
+% Time-stamp: <Fre 2017-07-28 19:31 juergen>
+%
+% Copyright (c) 2017 Juergen Hackl <hackl.j@gmx.at>
+%
+% More information on LaTeX: http://www.latex-project.org/
+%=============================================================================
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[a4paper,landscape]{article}
+
+%\usepackage[cm]{fullpage}
+\usepackage[margin=0pt]{geometry}
+ % \geometry{
+ % a4paper,
+ % total={297mm,210mm},
+ % landscape,
+ % }
+
+\usepackage{ifthen}
+
+\def\stripzero#1{\expandafter\stripzerohelp#1}
+\def\stripzerohelp#1{\ifx 0#1\expandafter\stripzerohelp\else#1\fi}
+
+\usepackage{tikz}
+\usetikzlibrary{calendar,shadows,patterns}
+\usetikzlibrary{positioning,calc}
+\usetikzlibrary{backgrounds}
+% Names of Holidays are inserted by employing this macro
+\def\termin#1#2{
+  \node [anchor=north west, text width= 3.4cm] at
+    ($(cal-#1.north west)+(3em, 0em)$) {\tiny{#2}};
+}
+
+\usepackage{fontspec}
+\setmainfont[ItalicFont={Fira Sans Light Italic},%
+BoldFont={Fira Sans},%
+BoldItalicFont={Fira Sans Italic}]%
+{Fira Sans Light}
+
+
+% \def\termin#1#2{
+% \node [text width= 3.4cm] at
+% ($(cal-#1)+(0em, 0em)$) {\textcolor{red\tiny{#2}};
+%  }
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% DOCUMENT
+\begin{document}
+
+\tikzstyle{every shadow}=[opacity=.4,shadow xshift=2pt,shadow yshift=-2pt,fill=black!60]
+\tikzstyle{caption}=[drop shadow,rounded corners=5pt,inner sep=4pt,draw=black!50,fill=black!5]
+\tikzstyle{plot legend}=[
+   rounded corners=2.5pt,inner xsep=3pt,inner ysep=2pt,
+   draw=black!50,fill=white,
+   font=\footnotesize,cells={anchor=center},
+   nodes={inner sep=2pt,text depth=0.15em,rounded corners=0pt,right}]
+ 
+\begin{tikzpicture}[remember picture,overlay]% anchor = west]% xshift=-0cm]
+\draw (current page.north) -- (current page.south);
+\end{tikzpicture}
+
+\begin{tikzpicture}[remember picture,overlay,shift={(current page.north west)}]%[remember picture,overlay,xshift=-0cm]
+
+\newcommand{\weekbegin}{2017-06-19}
+\newcommand{\weekend}{2017-06-25}
+% \newcommand{\weekbegin}{2017-07-03}
+% \newcommand{\weekend}{2017-07-09}
+
+
+% \newcommand{\weekbegin}{2017-01-02}
+% \newcommand{\weekend}{2017-01-08}
+
+% \newcommand{\weekbegin}{2017-12-18}
+% \newcommand{\weekend}{2017-12-24}
+
+% \newcommand{\weekbegin}{2017-08-14}
+% \newcommand{\weekend}{2017-08-20}
+
+
+\newlength{\daywidth}
+\newlength{\dayheight}
+\newlength{\weekheight}
+\newlength{\pagespace}
+\newlength{\boxspace}
+\newlength{\bugfixspace}
+\newcommand{\notesoffset}{0}
+
+\setlength{\daywidth}{34mm}
+\setlength{\dayheight}{25mm}
+\newcommand{\dayh}{25}
+\setlength{\weekheight}{5mm}
+\newcommand{\weekh}{5}
+\setlength{\pagespace}{12mm}
+\setlength{\boxspace}{2mm}
+\setlength{\bugfixspace}{0mm}
+%\setlength{\notesoffset}{0mm}
+\newcommand{\notesheight}{3.5}
+
+\newlength{\defaultpgflinewidth}
+\setlength{\defaultpgflinewidth}{.5pt}%{\pgflinewidth}
+
+\definecolor{linecolor}{RGB}{30,30,30}
+\definecolor{headingcolor}{RGB}{30,30,30}
+\definecolor{weekcolor}{gray}{0.5}
+\definecolor{weekendcolor}{gray}{0.9}
+\definecolor{monthcolor}{gray}{0.75}
+\definecolor{htextcolor}{gray}{1}
+\definecolor{textcolor}{RGB}{30,30,30}
+\definecolor{sundaycolor}{RGB}{58,110,143}
+\definecolor{indexcolor}{RGB}{30,30,30}
+ 
+\tikzset{myline/.style={draw, linecolor, line width = \defaultpgflinewidth}}
+\tikzset{mythinline/.style={draw, linecolor!50, line width = 0.3pt}}
+
+
+\begin{scope}[shift={(40.5mm,-13mm)}]
+\calendar(cal)
+[dates=\weekbegin to \weekend,
+execute before day scope={%
+      month caption:
+      \ifdate{equals=\weekbegin}{%
+        %
+        \newcount\myBcount
+        \newcount\myEcount
+%
+        \pgfcalendardatetojulian{\weekbegin}{\myBcount}
+        \pgfcalendardatetojulian{\weekend}{\myEcount}
+        \pgfcalendarjuliantodate{\the\myBcount}{\myByear}{\myBmonth}{\myBday}
+        \pgfcalendarjuliantodate{\the\myEcount}{\myEyear}{\myEmonth}{\myEday}
+%
+        \setlength{\bugfixspace}{0mm}
+      \ifdate{Thursday}{\setlength{\bugfixspace}{\pagespace}}{}%
+      \ifdate{Friday}{\setlength{\bugfixspace}{\pagespace}}{}%
+      \ifdate{Saturday}{\setlength{\bugfixspace}{\pagespace}}{}%
+      \ifdate{Sunday}{\setlength{\bugfixspace}{\pagespace}}{}%
+        \node[yshift=\weekheight, xshift=-\daywidth-\bugfixspace,
+          minimum width=2*\daywidth,
+          text width=2*\daywidth,
+          %draw,
+          % text width=4cm,
+          every month,
+          font=\Large\bf,
+          align=left,
+%               caption,
+%          above right =0mm,
+          anchor=north west,
+               inner sep=0em]
+            {\MakeUppercase{\pgfcalendarmonthshortname{\myBmonth}\myBday ~- \pgfcalendarmonthshortname{\myEmonth}\myEday}};
+       \ifnum \myBmonth > 7
+        \node at ($(current page.north east)-(0,\stripzero{\myBmonth}*1.75-14)$) [
+        fill=indexcolor,
+                  minimum width=17.5mm,
+                  minimum height=6mm,
+                  anchor = south east,
+                  rotate = 90,
+                  text = htextcolor,
+        ]{\MakeUppercase{\pgfcalendarmonthshortname{\myBmonth} \myBmonth}};
+        \else
+        \node at ($(current page.north east)-(0,\stripzero{\myBmonth}*1.75+7)$) [
+        fill=indexcolor,
+                  minimum width=17.5mm,
+                  minimum height=6mm,
+                  anchor = south east,
+                  rotate = 90,
+                  text = htextcolor,
+        ]{\MakeUppercase{\pgfcalendarmonthshortname{\myBmonth} \myBmonth}};
+        \fi
+          }{}
+      % week day captions:
+      \ifdate{at most=\weekbegin+6}{
+        \path (\pgfcalendarcurrentweekday\daywidth,0)
+          node[xshift=(\daywidth-\boxspace/2)/2+.3pt/2,
+          node distance=-\defaultpgflinewidth,
+               font=\normalsize,
+               above,
+               anchor=south,
+               mythinline,
+               minimum width=\daywidth-\boxspace/2,
+               text width=\daywidth-2*\boxspace,
+               minimum height=\weekheight,
+               inner sep = 0.0pt,
+               outer sep = 0pt,
+               text=htextcolor,
+               week bg,
+               align=left,
+               label={right,xshift=-7mm:\color{htextcolor}\bf\pgfcalendarcurrentday}
+               ] {%
+                 \MakeUppercase{\pgfcalendarweekdayname{\pgfcalendarcurrentweekday}}%
+          };
+      }{}
+    },
+    execute at begin day scope={%
+      \pgftransformxshift{\pgfcalendarcurrentweekday\daywidth}%
+    },
+    execute after day scope={%
+      \ifdate{Wednesday}{%
+        \pgftransformxshift{\pagespace}
+      }{}%
+    },
+    execute after day scope={%
+      \ifdate{Sunday}{%
+        \pgftransformyshift{-\dayheight}%
+        \pgftransformxshift{-\pagespace}
+      }{}%
+    },
+%    week list,
+%    day xshift=\daywidth,
+%    day yshift=\dayheight,
+    day bg/.style=,
+    every day text/.style={font=\footnotesize\bf},
+    week bg/.style={fill=weekcolor},
+    day code={%
+      \node[anchor=north west,
+            mythinline,
+            minimum width=\daywidth-\boxspace/2,
+            minimum height=\dayheight,
+            day bg]{};%
+      \node[anchor=north west,
+            every day text,
+            inner sep=7pt]{};%
+    },
+  every month/.append style={anchor=base},
+%    month label above centered
+  ]
+  if (Sunday) [sundaycolor]
+  if (weekend) [day bg/.append style={fill=weekendcolor}]
+%  if (equals=2017-06-20)
+  if (between=2017-06-20 and 2017-06-22)
+  {\node at (0,0) [anchor=north west,
+    inner sep = 0pt,
+    outer sep = 0pt,
+    minimum width=\daywidth-\boxspace/2,
+    text width=\daywidth-\boxspace/2,
+    minimum height=\dayheight,
+    fill=sundaycolor,opacity=.5,align=center,label={below,yshift=5mm:Urlaub}]{};}
+  %if (equals=2017-06-20)[day bg/.append style={fill=red!20,on background layer}]
+  % if (at most=\YYMM-01+-1,at least=\YYMM-last+1)
+  %   [%day bg/.append style={pattern=north east lines,pattern color=black!50},
+  %    day bg/.append style={fill=monthcolor},
+  %    every day text/.append style={font=\footnotesize}]
+;
+
+\tikzset{heading/.style={myline, node distance=-\defaultpgflinewidth+\boxspace, minimum width=\daywidth-\boxspace,minimum height=\weekheight,inner sep = 0pt,outer sep = 0pt,text=htextcolor,fill=headingcolor, font=\normalsize,}}
+\tikzset{headingbox/.style={myline, node distance=-\defaultpgflinewidth, minimum width=\daywidth-\boxspace,inner sep = 0pt,outer sep = 0pt,}}
+
+\node[yshift=-\boxspace-\weekheight,xshift=-\boxspace,above left,anchor=south east,heading,] (a) {\MakeUppercase{Focus}};
+\node[headingbox,below= of a,minimum height=18mm+\defaultpgflinewidth,](b){};
+
+\node[heading,below= of b](c){\MakeUppercase{List A}};
+\node[headingbox,below= of c,minimum height=53mm,](d){};
+
+\node[heading,below= of d](e){\MakeUppercase{List B}};
+\node[headingbox,below= of e,minimum height=53mm,](f){};
+
+% \node[heading,below= of f](g){\MakeUppercase{Not to-do list}};
+% \node[headingbox,below= of g,minimum height=31mm+2*\defaultpgflinewidth,](h){};
+
+
+\begin{scope}[yshift=-\dayheight]
+\fill[weekendcolor] (0,-0.01) rectangle (0.75,-11.9);
+\foreach \z/\l in
+{0.35/{06:00},0.7/{06:30},1.05/{07:00},1.4/{07:30},1.75/{08:00},2.1/{08:30},2.45/{09:00},2.8/{09:30},3.15/{10:00},3.5/{10:30},3.85/{11:00},4.2/{11:30},4.55/{12:00},4.9/{12:30},5.25/{13:00},5.6/{13:30},5.95/{14:00},6.3/{14:30},6.65/{15:00},7/{15:30},7.35/{16:00},7.7/{16:30},8.05/{17:00},8.4/{17:30},8.75/{18:00},9.1/{18:30},9.45/{19:00},9.8/{19:30},10.15/{20:00},10.5/{20:30},10.85/{21:00},11.2/{21:30},11.55/{22:00},11.9/{22:30}}
+{\draw [mythinline] (0,-\z) --++ (\daywidth-\boxspace/2,0) node [pos=0,above right=-1mm,font=\footnotesize,textcolor]{\l};}
+\end{scope}
+
+\begin{scope}[yshift=-\dayheight,xshift=\daywidth]
+\fill[weekendcolor] (0,-0.01) rectangle (0.75,-11.9);
+\foreach \z/\l in
+{0.35/{06:00},0.7/{06:30},1.05/{07:00},1.4/{07:30},1.75/{08:00},2.1/{08:30},2.45/{09:00},2.8/{09:30},3.15/{10:00},3.5/{10:30},3.85/{11:00},4.2/{11:30},4.55/{12:00},4.9/{12:30},5.25/{13:00},5.6/{13:30},5.95/{14:00},6.3/{14:30},6.65/{15:00},7/{15:30},7.35/{16:00},7.7/{16:30},8.05/{17:00},8.4/{17:30},8.75/{18:00},9.1/{18:30},9.45/{19:00},9.8/{19:30},10.15/{20:00},10.5/{20:30},10.85/{21:00},11.2/{21:30},11.55/{22:00},11.9/{22:30}}
+{\draw [mythinline] (0,-\z) --++ (\daywidth-\boxspace/2,0) node [pos=0,above right=-1mm,font=\footnotesize,textcolor]{\l};}
+\end{scope}
+
+\begin{scope}[yshift=-\dayheight,xshift=2\daywidth]
+\fill[weekendcolor] (0,-0.01) rectangle (0.75,-11.9);
+\foreach \z/\l in
+{0.35/{06:00},0.7/{06:30},1.05/{07:00},1.4/{07:30},1.75/{08:00},2.1/{08:30},2.45/{09:00},2.8/{09:30},3.15/{10:00},3.5/{10:30},3.85/{11:00},4.2/{11:30},4.55/{12:00},4.9/{12:30},5.25/{13:00},5.6/{13:30},5.95/{14:00},6.3/{14:30},6.65/{15:00},7/{15:30},7.35/{16:00},7.7/{16:30},8.05/{17:00},8.4/{17:30},8.75/{18:00},9.1/{18:30},9.45/{19:00},9.8/{19:30},10.15/{20:00},10.5/{20:30},10.85/{21:00},11.2/{21:30},11.55/{22:00},11.9/{22:30}}
+{\draw [mythinline] (0,-\z) --++ (\daywidth-\boxspace/2,0) node [pos=0,above right=-1mm,font=\footnotesize,textcolor]{\l};}
+\end{scope}
+
+
+\begin{scope}[yshift=-\dayheight,xshift=3\daywidth+\pagespace]
+\fill[weekendcolor] (0,-0.01) rectangle (0.75,-11.9);
+\foreach \z/\l in
+{0.35/{06:00},0.7/{06:30},1.05/{07:00},1.4/{07:30},1.75/{08:00},2.1/{08:30},2.45/{09:00},2.8/{09:30},3.15/{10:00},3.5/{10:30},3.85/{11:00},4.2/{11:30},4.55/{12:00},4.9/{12:30},5.25/{13:00},5.6/{13:30},5.95/{14:00},6.3/{14:30},6.65/{15:00},7/{15:30},7.35/{16:00},7.7/{16:30},8.05/{17:00},8.4/{17:30},8.75/{18:00},9.1/{18:30},9.45/{19:00},9.8/{19:30},10.15/{20:00},10.5/{20:30},10.85/{21:00},11.2/{21:30},11.55/{22:00},11.9/{22:30}}
+{\draw [mythinline] (0,-\z) --++ (\daywidth-\boxspace/2,0) node [pos=0,above right=-1mm,font=\footnotesize,textcolor]{\l};}
+\end{scope}
+
+\begin{scope}[yshift=-\dayheight,xshift=3\daywidth+\pagespace]
+\fill[weekendcolor] (0,-0.01) rectangle (0.75,-11.9);
+\foreach \z/\l in
+{0.35/{06:00},0.7/{06:30},1.05/{07:00},1.4/{07:30},1.75/{08:00},2.1/{08:30},2.45/{09:00},2.8/{09:30},3.15/{10:00},3.5/{10:30},3.85/{11:00},4.2/{11:30},4.55/{12:00},4.9/{12:30},5.25/{13:00},5.6/{13:30},5.95/{14:00},6.3/{14:30},6.65/{15:00},7/{15:30},7.35/{16:00},7.7/{16:30},8.05/{17:00},8.4/{17:30},8.75/{18:00},9.1/{18:30},9.45/{19:00},9.8/{19:30},10.15/{20:00},10.5/{20:30},10.85/{21:00},11.2/{21:30},11.55/{22:00},11.9/{22:30}}
+{\draw [mythinline] (0,-\z) --++ (\daywidth-\boxspace/2,0) node [pos=0,above right=-1mm,font=\footnotesize,textcolor]{\l};}
+\end{scope}
+
+\begin{scope}[yshift=-\dayheight,xshift=4\daywidth+\pagespace]
+\fill[weekendcolor] (0,-0.01) rectangle (0.75,-11.9);
+\foreach \z/\l in
+{0.35/{06:00},0.7/{06:30},1.05/{07:00},1.4/{07:30},1.75/{08:00},2.1/{08:30},2.45/{09:00},2.8/{09:30},3.15/{10:00},3.5/{10:30},3.85/{11:00},4.2/{11:30},4.55/{12:00},4.9/{12:30},5.25/{13:00},5.6/{13:30},5.95/{14:00},6.3/{14:30},6.65/{15:00},7/{15:30},7.35/{16:00},7.7/{16:30},8.05/{17:00},8.4/{17:30},8.75/{18:00},9.1/{18:30},9.45/{19:00},9.8/{19:30},10.15/{20:00},10.5/{20:30},10.85/{21:00},11.2/{21:30},11.55/{22:00},11.9/{22:30}}
+{\draw [mythinline] (0,-\z) --++ (\daywidth-\boxspace/2,0) node [pos=0,above right=-1mm,font=\footnotesize,textcolor]{\l};}
+\end{scope}
+
+\begin{scope}[yshift=-\dayheight,xshift=5\daywidth+\pagespace]
+\fill[weekendcolor] (0,-0.01) rectangle (0.75,-11.9);
+\foreach \z/\l in
+{0.35/{06:00},0.7/{06:30},1.05/{07:00},1.4/{07:30},1.75/{08:00},2.1/{08:30},2.45/{09:00},2.8/{09:30},3.15/{10:00},3.5/{10:30},3.85/{11:00},4.2/{11:30},4.55/{12:00},4.9/{12:30},5.25/{13:00},5.6/{13:30},5.95/{14:00},6.3/{14:30},6.65/{15:00},7/{15:30},7.35/{16:00},7.7/{16:30},8.05/{17:00},8.4/{17:30},8.75/{18:00},9.1/{18:30},9.45/{19:00},9.8/{19:30},10.15/{20:00},10.5/{20:30},10.85/{21:00},11.2/{21:30},11.55/{22:00},11.9/{22:30}}
+{\draw [mythinline] (0,-\z) --++ (\daywidth-\boxspace/2,0) node [pos=0,above right=-1mm,font=\footnotesize,textcolor]{\l};}
+\end{scope}
+
+\begin{scope}[yshift=-\dayheight,xshift=6\daywidth+\pagespace]
+\fill[weekendcolor] (0,-0.01) rectangle (0.75,-11.9);
+\foreach \z/\l in
+{0.35/{06:00},0.7/{06:30},1.05/{07:00},1.4/{07:30},1.75/{08:00},2.1/{08:30},2.45/{09:00},2.8/{09:30},3.15/{10:00},3.5/{10:30},3.85/{11:00},4.2/{11:30},4.55/{12:00},4.9/{12:30},5.25/{13:00},5.6/{13:30},5.95/{14:00},6.3/{14:30},6.65/{15:00},7/{15:30},7.35/{16:00},7.7/{16:30},8.05/{17:00},8.4/{17:30},8.75/{18:00},9.1/{18:30},9.45/{19:00},9.8/{19:30},10.15/{20:00},10.5/{20:30},10.85/{21:00},11.2/{21:30},11.55/{22:00},11.9/{22:30}}
+{\draw [mythinline] (0,-\z) --++ (\daywidth-\boxspace/2,0) node [pos=0,above right=-1mm,font=\footnotesize,textcolor]{\l};}
+\end{scope}
+
+
+\begin{scope}[yshift=-149 mm ,xshift=-\boxspace/4]
+          \node (x) at (0,0) [heading,minimum width=2*\daywidth-\boxspace/2]{\MakeUppercase{Personal To-Do List}};
+          \node [right=\boxspace of x,heading,minimum width=2*\daywidth-\boxspace/2] (y) {\MakeUppercase{Work To-Do List}};
+          \node [right=\pagespace of y,heading,minimum width=4*\daywidth] (z) {\MakeUppercase{Notes}};
+          %
+\foreach \z in {0,.5,...,\notesheight} {
+\draw [myline]
+let 
+\p1=(x.south west),
+\p2=(x.south east)
+in
+($(\x1,-\z)-(0,\weekheight/2)$) rectangle (\x2,\weekheight/2);
+}
+%
+\draw [myline]
+let
+\p1=(x.south west),
+\p2=(x.south east)
+in
+($(\x1,0)-(-.5,\weekheight/2)$) --++ (0,-\notesheight);
+%
+\foreach \z in {0,.5,...,\notesheight} {
+\draw [myline]
+let 
+\p1=(y.south west),
+\p2=(y.south east)
+in
+($(\x1,-\z)-(0,\weekheight/2)$) rectangle (\x2,\weekheight/2);
+}
+%
+\draw [myline]
+let
+\p1=(y.south west),
+\p2=(y.south east)
+in
+($(\x1,0)-(-.5,\weekheight/2)$) --++ (0,-\notesheight);
+%
+        \end{scope}
+
+
+\end{scope}
+
+
+
+
+\draw (0,0) -- (0.6,-.8);
+\draw (0,-21) --++ (0.6,.8);
+% \termin{2017-08-02}{Pfingstsonntag}
+\end{tikzpicture}
+
+
+\begin{tikzpicture}[remember picture,overlay]% anchor = west]% xshift=-0cm]
+\draw (current page.north east) --++ (-.6,-.6);
+\end{tikzpicture}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
