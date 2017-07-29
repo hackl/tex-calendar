@@ -2,7 +2,7 @@
 use strict; use warnings;
 use PDF::API2;
 
-my $filename = shift || 'test.pdf';
+my $filename = shift || '12.pdf';
 my $oldpdf = PDF::API2->open($filename);
 my $newpdf = PDF::API2->new;
 

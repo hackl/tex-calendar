@@ -1,8 +1,8 @@
 %=============================================================================
-% File:  month.tex -- Calender showing the month
+% File:  week.tex -- Calender showing the week
 % Author(s): Juergen Hackl <hackl.j@gmx.at>
 % Creation:  27 Jul 2017
-% Time-stamp: <Sam 2017-07-29 13:32 juergen>
+% Time-stamp: <Sam 2017-07-29 13:15 juergen>
 %
 % Copyright (c) 2017 Juergen Hackl <hackl.j@gmx.at>
 %
@@ -59,10 +59,25 @@ BoldItalicFont={Fira Sans Italic}]%
    draw=black!50,fill=white,
    font=\footnotesize,cells={anchor=center},
    nodes={inner sep=2pt,text depth=0.15em,rounded corners=0pt,right}]
- 
+
 \begin{tikzpicture}[remember picture,overlay,shift={(current page.north west)}]%[remember picture,overlay,xshift=-0cm]
 
-%\newcommand{\YYMM}{2017-01}
+%\newcommand{\weekbegin}{2017-06-19}
+\newcommand{\weekend}{2017-06-25}
+% \newcommand{\weekbegin}{2017-07-03}
+% \newcommand{\weekend}{2017-07-09}
+
+
+% \newcommand{\weekbegin}{2017-01-02}
+% \newcommand{\weekend}{2017-01-08}
+
+% \newcommand{\weekbegin}{2017-12-18}
+% \newcommand{\weekend}{2017-12-24}
+
+% \newcommand{\weekbegin}{2017-08-14}
+% \newcommand{\weekend}{2017-08-20}
+
+
 \newlength{\daywidth}
 \newlength{\dayheight}
 \newlength{\weekheight}
@@ -80,7 +95,7 @@ BoldItalicFont={Fira Sans Italic}]%
 \setlength{\boxspace}{2mm}
 \setlength{\bugfixspace}{0mm}
 %\setlength{\notesoffset}{0mm}
-\newcommand{\notesheight}{4.5}
+\newcommand{\notesheight}{18.5}
 
 \newlength{\defaultpgflinewidth}
 \setlength{\defaultpgflinewidth}{.5pt}%{\pgflinewidth}
@@ -95,65 +110,44 @@ BoldItalicFont={Fira Sans Italic}]%
 \definecolor{termincolor}{RGB}{58,110,143}
 \definecolor{sundaycolor}{gray}{.22}
 \definecolor{indexcolor}{gray}{.22}
-
-% \definecolor{linecolor}{RGB}{30,30,30}
-% \definecolor{headingcolor}{RGB}{30,30,30}
-% \definecolor{weekcolor}{gray}{0.5}
-% \definecolor{weekendcolor}{gray}{0.9}
-% \definecolor{monthcolor}{gray}{0.75}
-% \definecolor{htextcolor}{gray}{1}
-% \definecolor{textcolor}{RGB}{30,30,30}
-% \definecolor{sundaycolor}{RGB}{58,110,143}
-
-\newcount\monthsheetdate
-\newcount\monthsheetweekday
-\newcount\weekrows
-
-\pgfcalendardatetojulian{\YYMM-01}{\monthsheetdate}
-\pgfcalendarjuliantoweekday{\the\monthsheetdate}{\monthsheetweekday}
-\advance\monthsheetdate by -\the\monthsheetweekday
-\pgfcalendarjuliantodate{\the\monthsheetdate}{\myyear}{\mymonth}{\myday}
-\edef\monthsheetbegin{\myyear-\mymonth-\myday}
- 
-\pgfcalendardatetojulian{\YYMM-last}{\monthsheetdate}
-\pgfcalendarjuliantoweekday{\the\monthsheetdate}{\monthsheetweekday}
-\advance\monthsheetdate by -\the\monthsheetweekday
-\advance\monthsheetdate by 6
-\pgfcalendarjuliantodate{\the\monthsheetdate}{\myyear}{\mymonth}{\myday}
-\edef\monthsheetend{\myyear-\mymonth-\myday}
  
 \tikzset{myline/.style={draw, linecolor, line width = \defaultpgflinewidth}}
+\tikzset{mythinline/.style={draw, linecolor!50, line width = 0.3pt}}
 
 
-\begin{scope}[shift={(40.5mm,-20mm)}]
-\calendar(cal)[
-    dates=\monthsheetbegin{} to \monthsheetend{},
-    execute before day scope={%
+\begin{scope}[shift={(40.5mm,-13mm)}]
+\calendar(cal)
+[dates=\weekbegin to \weekbegin,
+execute before day scope={%
       month caption:
-      \ifdate{equals=\YYMM-01}{%
+      \ifdate{equals=\weekbegin}{%
+        %
         \newcount\myBcount
+        \newcount\myEcount
 %
-        \pgfcalendardatetojulian{\YYMM-01}{\myBcount}
+        \pgfcalendardatetojulian{\weekbegin}{\myBcount}
+        \pgfcalendardatetojulian{\weekend}{\myEcount}
         \pgfcalendarjuliantodate{\the\myBcount}{\myByear}{\myBmonth}{\myBday}
+        \pgfcalendarjuliantodate{\the\myEcount}{\myEyear}{\myEmonth}{\myEday}
 %
         \setlength{\bugfixspace}{0mm}
       \ifdate{Thursday}{\setlength{\bugfixspace}{\pagespace}}{}%
       \ifdate{Friday}{\setlength{\bugfixspace}{\pagespace}}{}%
       \ifdate{Saturday}{\setlength{\bugfixspace}{\pagespace}}{}%
       \ifdate{Sunday}{\setlength{\bugfixspace}{\pagespace}}{}%
-        \node[yshift=2\weekheight+\boxspace, xshift=-\daywidth-\bugfixspace,
-          minimum width=2*\daywidth,
-          text width=2*\daywidth,
-          % text width=4cm,
-%          draw,
-          every month,
-          font=\LARGE\bf,
-          align=left,
-%               caption,
-%          above right =0mm,
-          anchor=north west,
-               inner sep=0em]
-            {\MakeUppercase{\tikzmonthtext{}}};
+%         \node[yshift=\weekheight, xshift=-\daywidth-\bugfixspace,
+%           minimum width=2*\daywidth,
+%           text width=2*\daywidth,
+%           %draw,
+%           % text width=4cm,
+%           every month,
+%           font=\Large\bf,
+%           align=left,
+% %               caption,
+% %          above right =0mm,
+%           anchor=north west,
+%                inner sep=0em]
+%             {\MakeUppercase{\pgfcalendarmonthshortname{\myBmonth}\myBday ~- \pgfcalendarmonthshortname{\myEmonth}\myEday}};
        \ifnum \myBmonth > 7
        \draw [loosely dotted,black!50] ($(current page.north east)-(.6,\stripzero{\myBmonth}*1.75-14)$) --++ (0,-21);
         \node at ($(current page.north east)-(0,\stripzero{\myBmonth}*1.75-14)$) [
@@ -175,108 +169,88 @@ BoldItalicFont={Fira Sans Italic}]%
                   text = htextcolor,
         ]{\MakeUppercase{\pgfcalendarmonthshortname{\myBmonth} \myBmonth}};
         \fi
-      }{}
+          }{}
       % week day captions:
-      \ifdate{at most=\monthsheetbegin+6}{
-        \path (\pgfcalendarcurrentweekday\daywidth,0)
-          node[xshift=.5\daywidth+\defaultpgflinewidth/2,
-          node distance=-\defaultpgflinewidth,
-               font=\normalsize,
-               above,
-               anchor=south,
-               myline,
-               minimum width=\daywidth,
-               minimum height=\weekheight,
-               inner sep = 0.0pt,
-               outer sep = 0pt,
-               text=htextcolor,
-               week bg
-               ] {%
-                 \MakeUppercase{\pgfcalendarweekdayname{\pgfcalendarcurrentweekday}}%
-          };
-      }{}
+      % \ifdate{at most=\weekbegin+6}{
+      %   \path (\pgfcalendarcurrentweekday\daywidth,0)
+      %     node[xshift=(\daywidth-\boxspace/2)/2+.3pt/2,
+      %     node distance=-\defaultpgflinewidth,
+      %          font=\normalsize,
+      %          above,
+      %          anchor=south,
+      %          mythinline,
+      %          minimum width=\daywidth-\boxspace/2,
+      %          text width=\daywidth-2*\boxspace,
+      %          minimum height=\weekheight,
+      %          inner sep = 0.0pt,
+      %          outer sep = 0pt,
+      %          text=htextcolor,
+      %          week bg,
+      %          align=left,
+      %          label={right,xshift=-7mm:\color{htextcolor}\bf\pgfcalendarcurrentday}
+      %          ] {%
+      %            \MakeUppercase{\pgfcalendarweekdayname{\pgfcalendarcurrentweekday}}%
+      %     };
+      % }{}
     },
-    execute at begin day scope={%
-      \pgftransformxshift{\pgfcalendarcurrentweekday\daywidth}%
-    },
-    execute after day scope={%
-      \ifdate{Wednesday}{%
-        \pgftransformxshift{\pagespace}
-      }{}%
-    },
-    execute after day scope={%
-      \ifdate{Sunday}{%
-        \pgftransformyshift{-\dayheight}%
-        \pgftransformxshift{-\pagespace}
-      }{}%
-    },
+    % execute at begin day scope={%
+    %   \pgftransformxshift{\pgfcalendarcurrentweekday\daywidth}%
+    % },
+    % execute after day scope={%
+    %   \ifdate{Wednesday}{%
+    %     \pgftransformxshift{\pagespace}
+    %   }{}%
+    % },
+    % execute after day scope={%
+    %   \ifdate{Sunday}{%
+    %     \pgftransformyshift{-\dayheight}%
+    %     \pgftransformxshift{-\pagespace}
+    %   }{}%
+    % },
 %    week list,
 %    day xshift=\daywidth,
 %    day yshift=\dayheight,
-    day bg/.style=,
-    every day text/.style={font=\footnotesize\bf},
-    week bg/.style={fill=weekcolor},
-    day code={%
-      \node[anchor=north west,
-            myline,
-            minimum width=\daywidth,
-            minimum height=\dayheight,
-            day bg]{};%
-      \node[anchor=north west,
-            every day text,
-            inner sep=7pt]{\tikzdaytext};%
-    },
-  every month/.append style={anchor=base},
-%    month label above centered
+%     day bg/.style=,
+%     every day text/.style={font=\footnotesize\bf},
+%     week bg/.style={fill=weekcolor},
+%     day code={%
+%       \node[anchor=north west,
+%             mythinline,
+%             minimum width=\daywidth-\boxspace/2,
+%             minimum height=\dayheight,
+%             day bg]{};%
+%       \node[anchor=north west,
+%             every day text,
+%             inner sep=7pt]{};%
+%     },
+%   every month/.append style={anchor=base},
+% %    month label above centered
   ]
-  if (Sunday) [sundaycolor]
-  if (weekend) [day bg/.append style={fill=weekendcolor}]
+  % if (Sunday) [sundaycolor]
+  % if (weekend) [day bg/.append style={fill=weekendcolor}]
 %  if (equals=2017-06-20)
   % if (between=2017-06-20 and 2017-06-22)
   % {\node at (0,0) [anchor=north west,
   %   inner sep = 0pt,
   %   outer sep = 0pt,
-  %   minimum width=\daywidth,
-  %   text width=\daywidth,
+  %   minimum width=\daywidth-\boxspace/2,
+  %   text width=\daywidth-\boxspace/2,
   %   minimum height=\dayheight,
   %   fill=termincolor,opacity=.5,align=center,label={below,yshift=5mm:Urlaub}]{};}
   %if (equals=2017-06-20)[day bg/.append style={fill=red!20,on background layer}]
-  if (at most=\YYMM-01+-1,at least=\YYMM-last+1)
-    [%day bg/.append style={pattern=north east lines,pattern color=black!50},
-     day bg/.append style={fill=monthcolor},
-     every day text/.append style={font=\footnotesize}]
+  % if (at most=\YYMM-01+-1,at least=\YYMM-last+1)
+  %   [%day bg/.append style={pattern=north east lines,pattern color=black!50},
+  %    day bg/.append style={fill=monthcolor},
+  %    every day text/.append style={font=\footnotesize}]
 ;
 
 \tikzset{heading/.style={myline, node distance=-\defaultpgflinewidth+\boxspace, minimum width=\daywidth-\boxspace,minimum height=\weekheight,inner sep = 0pt,outer sep = 0pt,text=htextcolor,fill=headingcolor, font=\normalsize,}}
 \tikzset{headingbox/.style={myline, node distance=-\defaultpgflinewidth, minimum width=\daywidth-\boxspace,inner sep = 0pt,outer sep = 0pt,}}
 
-\node[xshift=-\boxspace,above left,anchor=south east,heading,] (a) {\MakeUppercase{Focus}};
-\node[headingbox,below= of a,minimum height=12mm,](b){};
 
-\node[heading,below= of b](c){\MakeUppercase{People to see}};
-\node[headingbox,below= of c,minimum height=31mm,](d){};
-
-\node[heading,below= of d](e){\MakeUppercase{Places to go}};
-\node[headingbox,below= of e,minimum height=31mm,](f){};
-
-\node[heading,below= of f](g){\MakeUppercase{Not to-do list}};
-\node[headingbox,below= of g,minimum height=31mm+2*\defaultpgflinewidth,](h){};
-
-\calendar[
-    dates=\monthsheetbegin{} to \monthsheetend{},
-    execute after day scope={%
-      \ifdate{Sunday}{%
-        \advance\weekrows by1
-      }{}
-      \ifdate{equals=\YYMM-last}{
-        \pgfmathsetmacro\offset{(\the\weekrows+1) * \dayh + \weekh}
-         \ifnum \the\weekrows = 5
-          \renewcommand{\notesheight}{2}
-        \fi
-       \begin{scope}[yshift=-\offset mm ,xshift=-\boxspace/4]
-          \node (x) at (0,0) [heading,minimum width=2*\daywidth-\boxspace/2]{\MakeUppercase{Personal Projects}};
-          \node [right=\boxspace of x,heading,minimum width=2*\daywidth-\boxspace/2] (y) {\MakeUppercase{Work Projects}};
-          \node [right=\pagespace of y,heading,minimum width=4*\daywidth] (z) {\MakeUppercase{Notes}};
+\begin{scope}[yshift=0 mm ,xshift=-\daywidth]
+          \node (x) at (0,0) [heading,minimum width=4*\daywidth,anchor = south west]{\MakeUppercase{Notes}};
+          \node [right=\pagespace of x,heading,minimum width=4*\daywidth] (y) {\MakeUppercase{Notes}};
           %
 \foreach \z in {0,.5,...,\notesheight} {
 \draw [myline]
@@ -284,15 +258,8 @@ let
 \p1=(x.south west),
 \p2=(x.south east)
 in
-($(\x1,-\z)-(0,\weekheight/2)$) rectangle (\x2,\weekheight/2);
+($(\x1,-\z)$) --++ (4*\daywidth,0);
 }
-%
-\draw [myline]
-let
-\p1=(x.south west),
-\p2=(x.south east)
-in
-($(\x1,0)-(-.5,\weekheight/2)$) --++ (0,-\notesheight);
 %
 \foreach \z in {0,.5,...,\notesheight} {
 \draw [myline]
@@ -300,29 +267,34 @@ let
 \p1=(y.south west),
 \p2=(y.south east)
 in
-($(\x1,-\z)-(0,\weekheight/2)$) rectangle (\x2,\weekheight/2);
+($(\x1,-\z)$) --++ (4*\daywidth,0);
 }
 %
-\draw [myline]
-let
-\p1=(y.south west),
-\p2=(y.south east)
-in
-($(\x1,0)-(-.5,\weekheight/2)$) --++ (0,-\notesheight);
 %
         \end{scope}
-      }{}%
-    },
-    day code={}
-    ];
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 \end{scope}
 
 
 
+
+% \draw (0,0) -- (0.6,-.8);
 % \draw (0,-21) --++ (0.6,.8);
-% \draw (0,0) -- (.6,-.8);
 % \termin{2017-08-02}{Pfingstsonntag}
 \end{tikzpicture}
 
@@ -361,7 +333,6 @@ in
 
 
 \end{tikzpicture}
-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

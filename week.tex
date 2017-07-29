@@ -2,7 +2,7 @@
 % File:  week.tex -- Calender showing the week
 % Author(s): Juergen Hackl <hackl.j@gmx.at>
 % Creation:  27 Jul 2017
-% Time-stamp: <Fre 2017-07-28 19:31 juergen>
+% Time-stamp: <Sam 2017-07-29 13:49 juergen>
 %
 % Copyright (c) 2017 Juergen Hackl <hackl.j@gmx.at>
 %
@@ -59,15 +59,11 @@ BoldItalicFont={Fira Sans Italic}]%
    draw=black!50,fill=white,
    font=\footnotesize,cells={anchor=center},
    nodes={inner sep=2pt,text depth=0.15em,rounded corners=0pt,right}]
- 
-\begin{tikzpicture}[remember picture,overlay]% anchor = west]% xshift=-0cm]
-\draw (current page.north) -- (current page.south);
-\end{tikzpicture}
 
 \begin{tikzpicture}[remember picture,overlay,shift={(current page.north west)}]%[remember picture,overlay,xshift=-0cm]
 
-\newcommand{\weekbegin}{2017-06-19}
-\newcommand{\weekend}{2017-06-25}
+% \newcommand{\weekbegin}{2017-06-19}
+% \newcommand{\weekend}{2017-06-25}
 % \newcommand{\weekbegin}{2017-07-03}
 % \newcommand{\weekend}{2017-07-09}
 
@@ -104,15 +100,16 @@ BoldItalicFont={Fira Sans Italic}]%
 \newlength{\defaultpgflinewidth}
 \setlength{\defaultpgflinewidth}{.5pt}%{\pgflinewidth}
 
-\definecolor{linecolor}{RGB}{30,30,30}
-\definecolor{headingcolor}{RGB}{30,30,30}
-\definecolor{weekcolor}{gray}{0.5}
-\definecolor{weekendcolor}{gray}{0.9}
-\definecolor{monthcolor}{gray}{0.75}
+\definecolor{linecolor}{gray}{.22}
+\definecolor{headingcolor}{gray}{.22}
+\definecolor{weekcolor}{gray}{0.35}
+\definecolor{weekendcolor}{gray}{0.8}
+\definecolor{monthcolor}{gray}{0.6}
 \definecolor{htextcolor}{gray}{1}
-\definecolor{textcolor}{RGB}{30,30,30}
-\definecolor{sundaycolor}{RGB}{58,110,143}
-\definecolor{indexcolor}{RGB}{30,30,30}
+\definecolor{textcolor}{gray}{.22}
+\definecolor{termincolor}{RGB}{58,110,143}
+\definecolor{sundaycolor}{gray}{.22}
+\definecolor{indexcolor}{gray}{.22}
  
 \tikzset{myline/.style={draw, linecolor, line width = \defaultpgflinewidth}}
 \tikzset{mythinline/.style={draw, linecolor!50, line width = 0.3pt}}
@@ -152,6 +149,7 @@ execute before day scope={%
                inner sep=0em]
             {\MakeUppercase{\pgfcalendarmonthshortname{\myBmonth}\myBday ~- \pgfcalendarmonthshortname{\myEmonth}\myEday}};
        \ifnum \myBmonth > 7
+       \draw [loosely dotted,black!50] ($(current page.north east)-(.6,\stripzero{\myBmonth}*1.75-14)$) --++ (0,-21);
         \node at ($(current page.north east)-(0,\stripzero{\myBmonth}*1.75-14)$) [
         fill=indexcolor,
                   minimum width=17.5mm,
@@ -161,6 +159,7 @@ execute before day scope={%
                   text = htextcolor,
         ]{\MakeUppercase{\pgfcalendarmonthshortname{\myBmonth} \myBmonth}};
         \else
+       \draw[loosely dotted,black!50] ($(current page.north east)-(.6,\stripzero{\myBmonth}*1.75+7)$) --++ (0,-21);
         \node at ($(current page.north east)-(0,\stripzero{\myBmonth}*1.75+7)$) [
         fill=indexcolor,
                   minimum width=17.5mm,
@@ -230,14 +229,14 @@ execute before day scope={%
   if (Sunday) [sundaycolor]
   if (weekend) [day bg/.append style={fill=weekendcolor}]
 %  if (equals=2017-06-20)
-  if (between=2017-06-20 and 2017-06-22)
-  {\node at (0,0) [anchor=north west,
-    inner sep = 0pt,
-    outer sep = 0pt,
-    minimum width=\daywidth-\boxspace/2,
-    text width=\daywidth-\boxspace/2,
-    minimum height=\dayheight,
-    fill=sundaycolor,opacity=.5,align=center,label={below,yshift=5mm:Urlaub}]{};}
+  % if (between=2017-06-20 and 2017-06-22)
+  % {\node at (0,0) [anchor=north west,
+  %   inner sep = 0pt,
+  %   outer sep = 0pt,
+  %   minimum width=\daywidth-\boxspace/2,
+  %   text width=\daywidth-\boxspace/2,
+  %   minimum height=\dayheight,
+  %   fill=termincolor,opacity=.5,align=center,label={below,yshift=5mm:Urlaub}]{};}
   %if (equals=2017-06-20)[day bg/.append style={fill=red!20,on background layer}]
   % if (at most=\YYMM-01+-1,at least=\YYMM-last+1)
   %   [%day bg/.append style={pattern=north east lines,pattern color=black!50},
@@ -364,14 +363,45 @@ in
 
 
 
-\draw (0,0) -- (0.6,-.8);
-\draw (0,-21) --++ (0.6,.8);
+% \draw (0,0) -- (0.6,-.8);
+% \draw (0,-21) --++ (0.6,.8);
 % \termin{2017-08-02}{Pfingstsonntag}
 \end{tikzpicture}
 
-
 \begin{tikzpicture}[remember picture,overlay]% anchor = west]% xshift=-0cm]
-\draw (current page.north east) --++ (-.6,-.6);
+\tikzset{mymarkline/.style={draw, black!50, line width = 0.6pt}}
+\tikzset{mycircle/.style={black!50}}
+
+\newlength{\marklength}
+\setlength{\marklength}{1.5mm}
+
+\newlength{\diam}
+\setlength{\diam}{1pt}
+
+\fill [mycircle] ($(current page.north)-(0,.8)$) circle (\diam);
+\fill [mycircle] ($(current page.north)-(0,3.4)$) circle (\diam);
+\fill [mycircle] ($(current page.north)-(0,6.4)$) circle (\diam);
+\fill [mycircle] ($(current page.north)-(0,9)$) circle (\diam);
+\fill [mycircle] ($(current page.south)+(0,.8)$) circle (\diam);
+\fill [mycircle] ($(current page.south)+(0,3.4)$) circle (\diam);
+\fill [mycircle] ($(current page.south)+(0,6.4)$) circle (\diam);
+\fill [mycircle] ($(current page.south)+(0,9)$) circle (\diam);
+
+
+\draw [mymarkline] (current page.north west) --++ (\marklength,0);
+\draw [mymarkline] (current page.north west) --++ (0,-\marklength);
+
+\draw [mymarkline] (current page.north east) --++ (-\marklength,0);
+\draw [mymarkline] (current page.north east) --++ (0,-\marklength);
+
+
+\draw [mymarkline] (current page.south west) --++ (\marklength,0);
+\draw [mymarkline] (current page.south west) --++ (0,\marklength);
+
+\draw [mymarkline] (current page.south east) --++ (-\marklength,0);
+\draw [mymarkline] (current page.south east) --++ (0,\marklength);
+
+
 \end{tikzpicture}
 
 
