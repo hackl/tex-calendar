@@ -1,0 +1,306 @@
+%=============================================================================
+% File:  month.tex -- Calender showing the month
+% Author(s): Juergen Hackl <hackl.j@gmx.at>
+% Creation:  27 Jul 2017
+% Time-stamp: <Mit 2017-08-02 16:58 juergen>
+%
+% Copyright (c) 2017 Juergen Hackl <hackl.j@gmx.at>
+%
+% More information on LaTeX: http://www.latex-project.org/
+%=============================================================================
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[a4paper,landscape]{article}
+
+%\usepackage[cm]{fullpage}
+\usepackage[margin=0pt]{geometry}
+ % \geometry{
+ % a4paper,
+ % total={297mm,210mm},
+ % landscape,
+ % }
+
+\usepackage{ifthen}
+
+\def\stripzero#1{\expandafter\stripzerohelp#1}
+\def\stripzerohelp#1{\ifx 0#1\expandafter\stripzerohelp\else#1\fi}
+
+\usepackage{tikz}
+\usetikzlibrary{calendar,shadows,patterns}
+\usetikzlibrary{positioning,calc}
+\usetikzlibrary{backgrounds}
+% Names of Holidays are inserted by employing this macro
+\def\termin#1#2{
+  \node [anchor=north west, text width= 3.4cm] at
+    ($(cal-#1.north west)+(3em, 0em)$) {\tiny{#2}};
+}
+
+\usepackage{fontspec}
+\setmainfont[ItalicFont={Fira Sans Light Italic},%
+BoldFont={Fira Sans},%
+BoldItalicFont={Fira Sans Italic}]%
+{Fira Sans Light}
+
+
+% \def\termin#1#2{
+% \node [text width= 3.4cm] at
+% ($(cal-#1)+(0em, 0em)$) {\textcolor{red\tiny{#2}};
+%  }
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% DOCUMENT
+\begin{document}
+
+\tikzstyle{every shadow}=[opacity=.4,shadow xshift=2pt,shadow yshift=-2pt,fill=black!60]
+\tikzstyle{caption}=[drop shadow,rounded corners=5pt,inner sep=4pt,draw=black!50,fill=black!5]
+\tikzstyle{plot legend}=[
+   rounded corners=2.5pt,inner xsep=3pt,inner ysep=2pt,
+   draw=black!50,fill=white,
+   font=\footnotesize,cells={anchor=center},
+   nodes={inner sep=2pt,text depth=0.15em,rounded corners=0pt,right}]
+
+\begin{tikzpicture}[remember picture,overlay,shift={(current page.north west)}]%[remember picture,overlay,xshift=-0cm]
+
+\newcommand{\YYMM}{2017-08}
+\newcommand{\YY}{2017}
+\newlength{\daywidth}
+\newlength{\dayheight}
+\newlength{\weekheight}
+\newlength{\pagespace}
+\newlength{\boxspace}
+\newlength{\bugfixspace}
+\newcommand{\notesoffset}{0}
+
+\setlength{\daywidth}{9mm}
+\setlength{\dayheight}{15.5mm}
+\newcommand{\dayh}{15}
+\setlength{\weekheight}{5mm}
+\newcommand{\weekh}{5}
+\setlength{\pagespace}{12mm}
+\setlength{\boxspace}{2mm}
+\setlength{\bugfixspace}{0mm}
+%\setlength{\notesoffset}{0mm}
+\newcommand{\notesheight}{4.5}
+
+\newlength{\defaultpgflinewidth}
+\setlength{\defaultpgflinewidth}{.5pt}%{\pgflinewidth}
+
+\definecolor{linecolor}{gray}{.22}
+\definecolor{headingcolor}{gray}{.22}
+\definecolor{weekcolor}{gray}{0.35}
+\definecolor{weekendcolor}{gray}{0.8}
+\definecolor{monthcolor}{gray}{0.6}
+\definecolor{htextcolor}{gray}{1}
+\definecolor{textcolor}{gray}{.22}
+\definecolor{termincolor}{RGB}{58,110,143}
+\definecolor{sundaycolor}{gray}{.22}
+\definecolor{indexcolor}{gray}{.22}
+
+% \definecolor{linecolor}{RGB}{30,30,30}
+% \definecolor{headingcolor}{RGB}{30,30,30}
+% \definecolor{weekcolor}{gray}{0.5}
+% \definecolor{weekendcolor}{gray}{0.9}
+% \definecolor{monthcolor}{gray}{0.75}
+% \definecolor{htextcolor}{gray}{1}
+% \definecolor{textcolor}{RGB}{30,30,30}
+% \definecolor{sundaycolor}{RGB}{58,110,143}
+
+\newcount\monthsheetdate
+\newcount\monthsheetweekday
+\newcount\weekrows
+
+\pgfcalendardatetojulian{\YYMM-01}{\monthsheetdate}
+\pgfcalendarjuliantoweekday{\the\monthsheetdate}{\monthsheetweekday}
+\advance\monthsheetdate by -\the\monthsheetweekday
+\pgfcalendarjuliantodate{\the\monthsheetdate}{\myyear}{\mymonth}{\myday}
+\edef\monthsheetbegin{\myyear-\mymonth-\myday}
+ 
+\pgfcalendardatetojulian{\YYMM-last}{\monthsheetdate}
+\pgfcalendarjuliantoweekday{\the\monthsheetdate}{\monthsheetweekday}
+\advance\monthsheetdate by -\the\monthsheetweekday
+\advance\monthsheetdate by 6
+\pgfcalendarjuliantodate{\the\monthsheetdate}{\myyear}{\mymonth}{\myday}
+\edef\monthsheetend{\myyear-\mymonth-\myday}
+ 
+\tikzset{myline/.style={draw, linecolor, line width = \defaultpgflinewidth}}
+
+ \tikzstyle{monthnode}=[draw,color=indexcolor,
+        fill=indexcolor, minimum width=\dayheight,
+                  minimum height=6mm,
+                  anchor = south east,
+                  rotate = 90,
+                  text = htextcolor,]
+
+\begin{scope}[shift={(13.4mm,-13mm)}]
+\draw[myline,fill=monthcolor] (0,0) rectangle (31\daywidth,-12\dayheight);
+%\newcount\mycount
+\calendar(cal)[
+    dates=\YYMM-01 to \YYMM-last,
+    execute before day scope={%
+      month caption:
+      \ifdate{equals=\YYMM-01}{%
+        \newcount\myBcount
+%
+        \pgfcalendardatetojulian{\YYMM-01}{\myBcount}
+        \pgfcalendarjuliantodate{\the\myBcount}{\myByear}{\myBmonth}{\myBday}
+       \node at (0,0) [monthnode]{\MakeUppercase{\pgfcalendarmonthshortname{\myBmonth} \myBmonth}};
+      }{}
+      % week day captions:
+      \ifdate{at most=\YYMM-last}{
+        \path (\pgfcalendarcurrentday\daywidth-\daywidth,0)
+          node[xshift=.5\daywidth+\defaultpgflinewidth/2,
+          node distance=-\defaultpgflinewidth,
+               font=\normalsize,
+               above,
+               anchor=south,
+               myline,
+               minimum width=\daywidth,
+               minimum height=\weekheight,
+               inner sep = 0.0pt,
+               outer sep = 0pt,
+               text=htextcolor,
+               week bg
+               ] {%
+                 \MakeUppercase{\pgfcalendarcurrentday}%
+          };
+      }{}
+    },
+    execute at begin day scope={%
+      \pgftransformxshift{\pgfcalendarcurrentday\daywidth-\daywidth}
+    },
+    day bg/.style=,
+    every day text/.style={font=\footnotesize\bf},
+    week bg/.style={fill=weekcolor},
+    day code={%
+      \node[anchor=north west,
+            myline,
+            minimum width=\daywidth,
+            minimum height=\dayheight,
+            fill=white,day bg,]{};%
+      \node[anchor=north west,
+            text width=\daywidth,
+            minimum height=5mm,
+            every day text,align=center,
+            inner sep=0pt,]{\pgfcalendarweekdayshortname{\pgfcalendarcurrentweekday}};%
+    },
+  every month/.append style={anchor=base},
+  ]
+  if (weekend) [day bg/.append style={fill=weekendcolor}];
+
+
+
+\begin{scope}[shift={(0mm,-\dayheight)}]
+\renewcommand{\YYMM}{2017-09}
+\calendar(cal)[dates=\YYMM-01 to \YYMM-last, execute before day scope={month caption:\ifdate{equals=\YYMM-01}{\newcount\myBcount \pgfcalendardatetojulian{\YYMM-01}{\myBcount} \pgfcalendarjuliantodate{\the\myBcount}{\myByear}{\myBmonth}{\myBday} \node at (0,0) [monthnode]{\MakeUppercase{\pgfcalendarmonthshortname{\myBmonth} \myBmonth}}; }{}}, execute at begin day scope={\pgftransformxshift{\pgfcalendarcurrentday\daywidth-\daywidth}}, day bg/.style=,every day text/.style={font=\footnotesize\bf}, week bg/.style={fill=weekcolor}, day code={\node[anchor=north west,myline,minimum width=\daywidth,minimum height=\dayheight,fill=white,day bg]{};\node[anchor=north west,text width=\daywidth,minimum height=5mm,every day text,align=center, inner sep=0pt]{\pgfcalendarweekdayshortname{\pgfcalendarcurrentweekday}};},every month/.append style={anchor=base},]if (weekend) [day bg/.append style={fill=weekendcolor}];
+\end{scope}
+
+\begin{scope}[shift={(0mm,-2\dayheight)}]
+\renewcommand{\YYMM}{2017-10}
+\calendar(cal)[dates=\YYMM-01 to \YYMM-last, execute before day scope={month caption:\ifdate{equals=\YYMM-01}{\newcount\myBcount \pgfcalendardatetojulian{\YYMM-01}{\myBcount} \pgfcalendarjuliantodate{\the\myBcount}{\myByear}{\myBmonth}{\myBday} \node at (0,0) [monthnode]{\MakeUppercase{\pgfcalendarmonthshortname{\myBmonth} \myBmonth}}; }{}}, execute at begin day scope={\pgftransformxshift{\pgfcalendarcurrentday\daywidth-\daywidth}}, day bg/.style=,every day text/.style={font=\footnotesize\bf}, week bg/.style={fill=weekcolor}, day code={\node[anchor=north west,myline,minimum width=\daywidth,minimum height=\dayheight,fill=white,day bg]{};\node[anchor=north west,text width=\daywidth,minimum height=5mm,every day text,align=center, inner sep=0pt]{\pgfcalendarweekdayshortname{\pgfcalendarcurrentweekday}};},every month/.append style={anchor=base},]if (weekend) [day bg/.append style={fill=weekendcolor}];
+\end{scope}
+
+\begin{scope}[shift={(0mm,-3\dayheight)}]
+\renewcommand{\YYMM}{2017-11}
+\calendar(cal)[dates=\YYMM-01 to \YYMM-last, execute before day scope={month caption:\ifdate{equals=\YYMM-01}{\newcount\myBcount \pgfcalendardatetojulian{\YYMM-01}{\myBcount} \pgfcalendarjuliantodate{\the\myBcount}{\myByear}{\myBmonth}{\myBday} \node at (0,0) [monthnode]{\MakeUppercase{\pgfcalendarmonthshortname{\myBmonth} \myBmonth}}; }{}}, execute at begin day scope={\pgftransformxshift{\pgfcalendarcurrentday\daywidth-\daywidth}}, day bg/.style=,every day text/.style={font=\footnotesize\bf}, week bg/.style={fill=weekcolor}, day code={\node[anchor=north west,myline,minimum width=\daywidth,minimum height=\dayheight,fill=white,day bg]{};\node[anchor=north west,text width=\daywidth,minimum height=5mm,every day text,align=center, inner sep=0pt]{\pgfcalendarweekdayshortname{\pgfcalendarcurrentweekday}};},every month/.append style={anchor=base},]if (weekend) [day bg/.append style={fill=weekendcolor}];
+\end{scope}
+
+\begin{scope}[shift={(0mm,-4\dayheight)}]
+\renewcommand{\YYMM}{2017-12}
+\calendar(cal)[dates=\YYMM-01 to \YYMM-last, execute before day scope={month caption:\ifdate{equals=\YYMM-01}{\newcount\myBcount \pgfcalendardatetojulian{\YYMM-01}{\myBcount} \pgfcalendarjuliantodate{\the\myBcount}{\myByear}{\myBmonth}{\myBday} \node at (0,0) [monthnode]{\MakeUppercase{\pgfcalendarmonthshortname{\myBmonth} \myBmonth}}; }{}}, execute at begin day scope={\pgftransformxshift{\pgfcalendarcurrentday\daywidth-\daywidth}}, day bg/.style=,every day text/.style={font=\footnotesize\bf}, week bg/.style={fill=weekcolor}, day code={\node[anchor=north west,myline,minimum width=\daywidth,minimum height=\dayheight,fill=white,day bg]{};\node[anchor=north west,text width=\daywidth,minimum height=5mm,every day text,align=center, inner sep=0pt]{\pgfcalendarweekdayshortname{\pgfcalendarcurrentweekday}};},every month/.append style={anchor=base},]if (weekend) [day bg/.append style={fill=weekendcolor}];
+\end{scope}
+
+
+\begin{scope}[shift={(0mm,-5\dayheight)}]
+\renewcommand{\YYMM}{2018-01}
+\calendar(cal)[dates=\YYMM-01 to \YYMM-last, execute before day scope={month caption:\ifdate{equals=\YYMM-01}{\newcount\myBcount \pgfcalendardatetojulian{\YYMM-01}{\myBcount} \pgfcalendarjuliantodate{\the\myBcount}{\myByear}{\myBmonth}{\myBday} \node at (0,0) [monthnode]{\MakeUppercase{\pgfcalendarmonthshortname{\myBmonth} \myBmonth}}; }{}}, execute at begin day scope={\pgftransformxshift{\pgfcalendarcurrentday\daywidth-\daywidth}}, day bg/.style=,every day text/.style={font=\footnotesize\bf}, week bg/.style={fill=weekcolor}, day code={\node[anchor=north west,myline,minimum width=\daywidth,minimum height=\dayheight,fill=white,day bg]{};\node[anchor=north west,text width=\daywidth,minimum height=5mm,every day text,align=center, inner sep=0pt]{\pgfcalendarweekdayshortname{\pgfcalendarcurrentweekday}};},every month/.append style={anchor=base},]if (weekend) [day bg/.append style={fill=weekendcolor}];
+\end{scope}
+
+
+\begin{scope}[shift={(0mm,-6\dayheight)}]
+\renewcommand{\YYMM}{2018-02}
+\calendar(cal)[dates=\YYMM-01 to \YYMM-last, execute before day scope={month caption:\ifdate{equals=\YYMM-01}{\newcount\myBcount \pgfcalendardatetojulian{\YYMM-01}{\myBcount} \pgfcalendarjuliantodate{\the\myBcount}{\myByear}{\myBmonth}{\myBday} \node at (0,0) [monthnode]{\MakeUppercase{\pgfcalendarmonthshortname{\myBmonth} \myBmonth}}; }{}}, execute at begin day scope={\pgftransformxshift{\pgfcalendarcurrentday\daywidth-\daywidth}}, day bg/.style=,every day text/.style={font=\footnotesize\bf}, week bg/.style={fill=weekcolor}, day code={\node[anchor=north west,myline,minimum width=\daywidth,minimum height=\dayheight,fill=white,day bg]{};\node[anchor=north west,text width=\daywidth,minimum height=5mm,every day text,align=center, inner sep=0pt]{\pgfcalendarweekdayshortname{\pgfcalendarcurrentweekday}};},every month/.append style={anchor=base},]if (weekend) [day bg/.append style={fill=weekendcolor}];
+\end{scope}
+
+
+\begin{scope}[shift={(0mm,-7\dayheight)}]
+\renewcommand{\YYMM}{2018-03}
+\calendar(cal)[dates=\YYMM-01 to \YYMM-last, execute before day scope={month caption:\ifdate{equals=\YYMM-01}{\newcount\myBcount \pgfcalendardatetojulian{\YYMM-01}{\myBcount} \pgfcalendarjuliantodate{\the\myBcount}{\myByear}{\myBmonth}{\myBday} \node at (0,0) [monthnode]{\MakeUppercase{\pgfcalendarmonthshortname{\myBmonth} \myBmonth}}; }{}}, execute at begin day scope={\pgftransformxshift{\pgfcalendarcurrentday\daywidth-\daywidth}}, day bg/.style=,every day text/.style={font=\footnotesize\bf}, week bg/.style={fill=weekcolor}, day code={\node[anchor=north west,myline,minimum width=\daywidth,minimum height=\dayheight,fill=white,day bg]{};\node[anchor=north west,text width=\daywidth,minimum height=5mm,every day text,align=center, inner sep=0pt]{\pgfcalendarweekdayshortname{\pgfcalendarcurrentweekday}};},every month/.append style={anchor=base},]if (weekend) [day bg/.append style={fill=weekendcolor}];
+\end{scope}
+
+\begin{scope}[shift={(0mm,-8\dayheight)}]
+\renewcommand{\YYMM}{2018-04}
+\calendar(cal)[dates=\YYMM-01 to \YYMM-last, execute before day scope={month caption:\ifdate{equals=\YYMM-01}{\newcount\myBcount \pgfcalendardatetojulian{\YYMM-01}{\myBcount} \pgfcalendarjuliantodate{\the\myBcount}{\myByear}{\myBmonth}{\myBday} \node at (0,0) [monthnode]{\MakeUppercase{\pgfcalendarmonthshortname{\myBmonth} \myBmonth}}; }{}}, execute at begin day scope={\pgftransformxshift{\pgfcalendarcurrentday\daywidth-\daywidth}}, day bg/.style=,every day text/.style={font=\footnotesize\bf}, week bg/.style={fill=weekcolor}, day code={\node[anchor=north west,myline,minimum width=\daywidth,minimum height=\dayheight,fill=white,day bg]{};\node[anchor=north west,text width=\daywidth,minimum height=5mm,every day text,align=center, inner sep=0pt]{\pgfcalendarweekdayshortname{\pgfcalendarcurrentweekday}};},every month/.append style={anchor=base},]if (weekend) [day bg/.append style={fill=weekendcolor}];
+\end{scope}
+
+\begin{scope}[shift={(0mm,-9\dayheight)}]
+\renewcommand{\YYMM}{2018-05}
+\calendar(cal)[dates=\YYMM-01 to \YYMM-last, execute before day scope={month caption:\ifdate{equals=\YYMM-01}{\newcount\myBcount \pgfcalendardatetojulian{\YYMM-01}{\myBcount} \pgfcalendarjuliantodate{\the\myBcount}{\myByear}{\myBmonth}{\myBday} \node at (0,0) [monthnode]{\MakeUppercase{\pgfcalendarmonthshortname{\myBmonth} \myBmonth}}; }{}}, execute at begin day scope={\pgftransformxshift{\pgfcalendarcurrentday\daywidth-\daywidth}}, day bg/.style=,every day text/.style={font=\footnotesize\bf}, week bg/.style={fill=weekcolor}, day code={\node[anchor=north west,myline,minimum width=\daywidth,minimum height=\dayheight,fill=white,day bg]{};\node[anchor=north west,text width=\daywidth,minimum height=5mm,every day text,align=center, inner sep=0pt]{\pgfcalendarweekdayshortname{\pgfcalendarcurrentweekday}};},every month/.append style={anchor=base},]if (weekend) [day bg/.append style={fill=weekendcolor}];
+\end{scope}
+
+\begin{scope}[shift={(0mm,-10\dayheight)}]
+\renewcommand{\YYMM}{2018-06}
+\calendar(cal)[dates=\YYMM-01 to \YYMM-last, execute before day scope={month caption:\ifdate{equals=\YYMM-01}{\newcount\myBcount \pgfcalendardatetojulian{\YYMM-01}{\myBcount} \pgfcalendarjuliantodate{\the\myBcount}{\myByear}{\myBmonth}{\myBday} \node at (0,0) [monthnode]{\MakeUppercase{\pgfcalendarmonthshortname{\myBmonth} \myBmonth}}; }{}}, execute at begin day scope={\pgftransformxshift{\pgfcalendarcurrentday\daywidth-\daywidth}}, day bg/.style=,every day text/.style={font=\footnotesize\bf}, week bg/.style={fill=weekcolor}, day code={\node[anchor=north west,myline,minimum width=\daywidth,minimum height=\dayheight,fill=white,day bg]{};\node[anchor=north west,text width=\daywidth,minimum height=5mm,every day text,align=center, inner sep=0pt]{\pgfcalendarweekdayshortname{\pgfcalendarcurrentweekday}};},every month/.append style={anchor=base},]if (weekend) [day bg/.append style={fill=weekendcolor}];
+\end{scope}
+
+\begin{scope}[shift={(0mm,-11\dayheight)}]
+\renewcommand{\YYMM}{2018-07}
+\calendar(cal)[dates=\YYMM-01 to \YYMM-last, execute before day scope={month caption:\ifdate{equals=\YYMM-01}{\newcount\myBcount \pgfcalendardatetojulian{\YYMM-01}{\myBcount} \pgfcalendarjuliantodate{\the\myBcount}{\myByear}{\myBmonth}{\myBday} \node at (0,0) [monthnode]{\MakeUppercase{\pgfcalendarmonthshortname{\myBmonth} \myBmonth}}; }{}}, execute at begin day scope={\pgftransformxshift{\pgfcalendarcurrentday\daywidth-\daywidth}}, day bg/.style=,every day text/.style={font=\footnotesize\bf}, week bg/.style={fill=weekcolor}, day code={\node[anchor=north west,myline,minimum width=\daywidth,minimum height=\dayheight,fill=white,day bg]{};\node[anchor=north west,text width=\daywidth,minimum height=5mm,every day text,align=center, inner sep=0pt]{\pgfcalendarweekdayshortname{\pgfcalendarcurrentweekday}};},every month/.append style={anchor=base},]if (weekend) [day bg/.append style={fill=weekendcolor}];
+\end{scope}
+
+
+\end{scope}
+
+
+
+% \draw (0,-21) --++ (0.6,.8);
+% \draw (0,0) -- (.6,-.8);
+% \termin{2017-08-02}{Pfingstsonntag}
+\end{tikzpicture}
+
+\begin{tikzpicture}[remember picture,overlay]% anchor = west]% xshift=-0cm]
+\tikzset{mymarkline/.style={draw, black!50, line width = 0.6pt}}
+\tikzset{mycircle/.style={black!50}}
+
+\newlength{\marklength}
+\setlength{\marklength}{1.5mm}
+
+\newlength{\diam}
+\setlength{\diam}{1pt}
+
+% \fill [mycircle] ($(current page.north)-(0,.8)$) circle (\diam);
+% \fill [mycircle] ($(current page.north)-(0,3.4)$) circle (\diam);
+% \fill [mycircle] ($(current page.north)-(0,6.4)$) circle (\diam);
+% \fill [mycircle] ($(current page.north)-(0,9)$) circle (\diam);
+\fill [mycircle] ($(current page.south)+(0,.8)$) circle (\diam);
+% \fill [mycircle] ($(current page.south)+(0,3.4)$) circle (\diam);
+% \fill [mycircle] ($(current page.south)+(0,6.4)$) circle (\diam);
+% \fill [mycircle] ($(current page.south)+(0,9)$) circle (\diam);
+
+
+\draw [mymarkline] (current page.north west) --++ (\marklength,0);
+\draw [mymarkline] (current page.north west) --++ (0,-\marklength);
+
+\draw [mymarkline] (current page.north east) --++ (-\marklength,0);
+\draw [mymarkline] (current page.north east) --++ (0,-\marklength);
+
+
+\draw [mymarkline] (current page.south west) --++ (\marklength,0);
+\draw [mymarkline] (current page.south west) --++ (0,\marklength);
+
+\draw [mymarkline] (current page.south east) --++ (-\marklength,0);
+\draw [mymarkline] (current page.south east) --++ (0,\marklength);
+
+
+\end{tikzpicture}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
